@@ -2,7 +2,7 @@
 
 const chalk = require("chalk");
 const inquirer = require("inquirer");
-const fs = require("fs");
+const fs = require("fs").promises;
 
 console.log("PW-Manager");
 
@@ -20,13 +20,16 @@ const secretMasterPassword = "helloworld";
 //   vercel: "niceapp",
 // };
 
-const questions = [
+const questionMasterPassword = [
   {
     // type password for hidden input
     type: "password",
     name: "masterPassword",
     message: "What is the super secret master password?",
   },
+];
+
+const questionPasswordName = [
   {
     type: "input",
     name: "passwordName",
@@ -38,7 +41,7 @@ const questions = [
 
 async function validateAccess() {
   // await object "answers" is destructured; note: to access object properties you can use answers["name"] or answers.name
-  const { masterPassword, passwordName } = await inquirer.prompt(questions);
+  const { masterPassword } = await inquirer.prompt(questionMasterPassword);
 
   if (masterPassword !== secretMasterPassword) {
     console.error(chalk.red("You are not welcome here! 👿"));
@@ -47,21 +50,20 @@ async function validateAccess() {
     return;
   }
 
-  fs.readFile("/Users/nbecker/dev/pw-manager/db.json", "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    const passwordSafe = JSON.parse(data);
+  const { passwordName } = await inquirer.prompt(questionPasswordName);
 
-    const passwordSafeKeys = Object.keys(passwordSafe);
+  const passwordSafeJSON = await fs.readFile("./db.json", "utf8");
 
-    if (passwordSafeKeys.includes(passwordName)) {
-      console.log(chalk.green(passwordSafe[passwordName]));
-    } else {
-      console.log(chalk.yellow("Does not exist in database!"));
-    }
-  });
+  const passwordSafe = JSON.parse(passwordSafeJSON);
+
+  const passwordSafeKeys = Object.keys(passwordSafe);
+
+  // Alternative: if(passwordSafe[passwordName]); returns true if value exists; Object.keys not necessary
+  if (passwordSafeKeys.includes(passwordName)) {
+    console.log(chalk.green(passwordSafe[passwordName]));
+  } else {
+    console.log(chalk.yellow("Does not exist in database!"));
+  }
 }
 
 validateAccess();
