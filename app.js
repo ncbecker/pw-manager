@@ -2,6 +2,7 @@
 
 const chalk = require("chalk");
 const inquirer = require("inquirer");
+const fs = require("fs");
 
 console.log("PW-Manager");
 
@@ -13,14 +14,15 @@ console.log("PW-Manager");
 
 const secretMasterPassword = "helloworld";
 
-const passwordSafe = {
-  wifi: "password123",
-  github: "helloworld",
-  vercel: "niceapp",
-};
+// const passwordSafe = {
+//   wifi: "password123",
+//   github: "helloworld",
+//   vercel: "niceapp",
+// };
 
 const questions = [
   {
+    // type password for hidden input
     type: "password",
     name: "masterPassword",
     message: "What is the super secret master password?",
@@ -44,12 +46,22 @@ async function validateAccess() {
     // return is needed since function is async; otherwise the function wouldn't be called immediately
     return;
   }
-  const passwordSafeKeys = Object.keys(passwordSafe);
-  if (passwordSafeKeys.includes(passwordName)) {
-    console.log(chalk.green(passwordSafe[passwordName]));
-  } else {
-    console.log(chalk.yellow("Does not exist in database!"));
-  }
+
+  fs.readFile("/Users/nbecker/dev/pw-manager/db.json", "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    const passwordSafe = JSON.parse(data);
+
+    const passwordSafeKeys = Object.keys(passwordSafe);
+
+    if (passwordSafeKeys.includes(passwordName)) {
+      console.log(chalk.green(passwordSafe[passwordName]));
+    } else {
+      console.log(chalk.yellow("Does not exist in database!"));
+    }
+  });
 }
 
 validateAccess();
