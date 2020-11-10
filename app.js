@@ -1,3 +1,5 @@
+const chalk = require("chalk");
+
 // console.log("Hello World");
 
 // console.log("PW-Manager");
@@ -41,9 +43,9 @@ inquirer.prompt(questions[0]).then((answers) => {
   console.log(`Hi ${answers["name"]}!`);
   inquirer.prompt(questions[1]).then((answers) => {
     if (answers["password"] === "helloworld") {
-      console.log("Happy hacking!");
+      console.log(chalk.green("Happy hacking!"));
     } else {
-      console.log("Wrooong!");
+      console.log(chalk.red("Wrooong!"));
     }
   });
 });
