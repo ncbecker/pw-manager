@@ -1,14 +1,9 @@
+// require similar to import
+
 const chalk = require("chalk");
+const inquirer = require("inquirer");
 
-// console.log("Hello World");
-
-// console.log("PW-Manager");
-
-// console.log(process.argv);
-
-// process.argv.forEach((val, index) => {
-//   console.log(`${index}: ${val}`);
-// });
+console.log("PW-Manager");
 
 const args = process.argv.slice(2);
 
@@ -16,36 +11,34 @@ console.log(args);
 
 const passwordName = args[0];
 
-// console.log(`You want to know the password of '${passwordName}'`);
+const secretMasterPassword = "helloworld";
 
-// if (passwordName === "Nico") {
-//   console.log("Password is honigblume");
-// } else {
-//   console.log("Unknown");
-// }
-
-const inquirer = require("inquirer");
-
-let questions = [
+const questions = [
   {
     type: "input",
-    name: "name",
-    message: "What's your name?",
-  },
-  {
-    type: "input",
-    name: "password",
-    message: "What's your password?",
+    name: "masterPassword",
+    message: "What is the super secret master password?",
   },
 ];
 
-inquirer.prompt(questions[0]).then((answers) => {
-  console.log(`Hi ${answers["name"]}!`);
-  inquirer.prompt(questions[1]).then((answers) => {
-    if (answers["password"] === "helloworld") {
-      console.log(chalk.green("Happy hacking!"));
-    } else {
-      console.log(chalk.red("Wrooong!"));
-    }
-  });
-});
+// instead of ".then" we can use async function and await
+
+async function validateAccess() {
+  // await object "answers" is destructured; note: to access object properties you can use answers["name"] or answers.name
+  const { masterPassword } = await inquirer.prompt(questions);
+
+  if (masterPassword !== secretMasterPassword) {
+    console.error(chalk.red("You are not welcome here! 👿"));
+    validateAccess();
+    // return is needed since function is async; otherwise the function wouldn't be called immediately
+    return;
+  }
+
+  if (passwordName === "Nico") {
+    console.log(chalk.green("Password is honigblume"));
+  } else {
+    console.log(chalk.yellow("Unknown password"));
+  }
+}
+
+validateAccess();
