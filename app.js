@@ -4,21 +4,9 @@ const chalk = require("chalk");
 const inquirer = require("inquirer");
 const fs = require("fs").promises;
 
-console.log("PW-Manager");
-
-// const args = process.argv.slice(2);
-
-// console.log(args);
-
-// const passwordName = args[0];
+console.log(chalk.magenta("PW-Manager"));
 
 const secretMasterPassword = "helloworld";
-
-// const passwordSafe = {
-//   wifi: "password123",
-//   github: "helloworld",
-//   vercel: "niceapp",
-// };
 
 const questionMasterPassword = [
   {
@@ -37,6 +25,15 @@ const questionPasswordName = [
   },
 ];
 
+const questionGetOrSave = [
+  {
+    type: "list",
+    name: "answerGetOrSave",
+    message: "Type in GET or SAVE to choose",
+    choices: ["SAVE", "GET"],
+  },
+];
+
 // instead of ".then" we can use async function and await
 
 async function validateAccess() {
@@ -50,20 +47,56 @@ async function validateAccess() {
     return;
   }
 
-  const { passwordName } = await inquirer.prompt(questionPasswordName);
+  const { answerGetOrSave } = await inquirer.prompt(questionGetOrSave);
 
   const passwordSafeJSON = await fs.readFile("./db.json", "utf8");
 
   const passwordSafe = JSON.parse(passwordSafeJSON);
 
-  const passwordSafeKeys = Object.keys(passwordSafe);
+  if (answerGetOrSave === "GET") {
+    const { passwordName } = await inquirer.prompt(questionPasswordName);
 
-  // Alternative: if(passwordSafe[passwordName]); returns true if value exists; Object.keys not necessary
-  if (passwordSafeKeys.includes(passwordName)) {
-    console.log(chalk.green(passwordSafe[passwordName]));
+    const passwordSafeKeys = Object.keys(passwordSafe);
+
+    // Alternative: if(passwordSafe[passwordName]); returns true if value exists; Object.keys not necessary
+    if (passwordSafeKeys.includes(passwordName)) {
+      console.log(chalk.green(passwordSafe[passwordName]));
+    } else {
+      console.log(chalk.yellow("Does not exist in database!"));
+    }
+  } else if (answerGetOrSave === "SAVE") {
+    const newEntry = await createNewEntry();
+    const newPasswordSafe = Object.assign(passwordSafe, newEntry);
+    const data = JSON.stringify(newPasswordSafe);
+
+    await fs.writeFile("./db.json", data);
+
+    console.log(chalk.green("SAVED 🚀"));
   } else {
-    console.log(chalk.yellow("Does not exist in database!"));
+    console.log("RESTART");
   }
+}
+
+const questionNewTitle = [
+  {
+    type: "input",
+    name: "answerTitle",
+    message: "Title?",
+  },
+];
+
+const questionNewPassword = [
+  {
+    type: "input",
+    name: "answerPassword",
+    message: "Password?",
+  },
+];
+
+async function createNewEntry() {
+  const { answerTitle } = await inquirer.prompt(questionNewTitle);
+  const { answerPassword } = await inquirer.prompt(questionNewPassword);
+  return { [answerTitle]: answerPassword };
 }
 
 validateAccess();
