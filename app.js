@@ -30,7 +30,7 @@ const questionGetOrSave = [
   {
     type: "list",
     name: "answerGetOrSave",
-    message: "Type in GET or SAVE to choose",
+    message: "Please choose: SAVE or GET a password?",
     choices: ["SAVE", "GET"],
   },
 ];
