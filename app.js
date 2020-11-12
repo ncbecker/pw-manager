@@ -5,17 +5,18 @@ const {
   askGetOrSave,
   askPasswordName,
 } = require("./lib/questions");
-const { createNewEntry } = require("./lib/newentry");
+const { createNewEntry } = require("./lib/newEntry");
 const { decryptData } = require("./lib/crypto");
+const { readMasterPassword } = require("./lib/masterPassword");
 
 console.log(chalk.magenta("PW-Manager"));
 
-const secretMasterPassword = "helloworld";
-
 async function run() {
-  const masterPassword = await askForMasterPassword();
+  const secretMasterPassword = await readMasterPassword();
 
-  if (masterPassword !== secretMasterPassword) {
+  const answerMasterPassword = await askForMasterPassword();
+
+  if (answerMasterPassword !== secretMasterPassword) {
     console.error(chalk.red("You are not welcome here! 👿"));
     return run();
   }
