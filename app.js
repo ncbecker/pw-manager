@@ -1,5 +1,6 @@
 const fs = require("fs").promises;
 const chalk = require("chalk");
+const kleur = require("kleur");
 const {
   askForMasterPassword,
   askGetOrSave,
@@ -9,7 +10,7 @@ const { createNewEntry } = require("./lib/newEntry");
 const { decryptData } = require("./lib/crypto");
 const { readMasterPassword } = require("./lib/masterPassword");
 
-console.log(chalk.magenta("PW-Manager"));
+console.log(kleur.bgYellow(chalk.magenta("PW-Manager")));
 
 async function run() {
   const secretMasterPassword = await readMasterPassword();
