@@ -52,6 +52,21 @@ MongoClient.connect(url, function (err, client) {
   // client.close();
 });
 
+// DELETE SINGLE DOCUMENT
+MongoClient.connect(url, function (err, client) {
+  assert.equal(null, err);
+  const db = client.db("pw-manager");
+
+  db.collection("passwords")
+    .deleteOne({
+      name: "gmail",
+    })
+    .then(function (result) {
+      // process result
+    });
+  // client.close();
+});
+
 console.log(kleur.bgYellow(chalk.magenta("PW-Manager")));
 
 async function run() {
