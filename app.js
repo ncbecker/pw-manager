@@ -1,13 +1,12 @@
 const fs = require("fs").promises;
-const CryptoJS = require("crypto-js");
 const chalk = require("chalk");
 const {
   askForMasterPassword,
   askGetOrSave,
   askPasswordName,
-  askNewTitle,
-  askNewPassword,
 } = require("./lib/questions");
+const { createNewEntry } = require("./lib/newentry");
+const { decryptData } = require("./lib/crypto");
 
 console.log(chalk.magenta("PW-Manager"));
 
@@ -42,7 +41,7 @@ async function run() {
       console.log(chalk.yellow("Does not exist in database!"));
     }
   } else if (answerSaveOrGet === "SAVE") {
-    const newEntry = await createNewEntry();
+    const newEntry = await createNewEntry(secretMasterPassword);
     const newPasswordSafe = Object.assign(passwordSafe, newEntry);
     const data = JSON.stringify(newPasswordSafe);
 
@@ -52,25 +51,6 @@ async function run() {
   } else {
     console.log("RESTART");
   }
-}
-
-// new entry component
-
-async function createNewEntry() {
-  const answerNewTitle = await askNewTitle();
-  const answerNewPassword = await askNewPassword();
-  const encryptPassword = encryptData(answerNewPassword, secretMasterPassword);
-  return { [answerNewTitle]: encryptPassword };
-}
-
-// crypto-js component
-
-function encryptData(data, password) {
-  return CryptoJS.AES.encrypt(JSON.stringify(data), password).toString();
-}
-function decryptData(data, password) {
-  const bytes = CryptoJS.AES.decrypt(data, password);
-  return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
 }
 
 run();
