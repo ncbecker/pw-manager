@@ -3,6 +3,7 @@
 const chalk = require("chalk");
 const inquirer = require("inquirer");
 const fs = require("fs").promises;
+const CryptoJS = require("crypto-js");
 
 console.log(chalk.magenta("PW-Manager"));
 
@@ -29,7 +30,7 @@ const questionGetOrSave = [
   {
     type: "list",
     name: "answerGetOrSave",
-    message: "Type in GET or SAVE to choose",
+    message: "Please choose: SAVE or GET a password?",
     choices: ["SAVE", "GET"],
   },
 ];
@@ -60,7 +61,11 @@ async function validateAccess() {
 
     // Alternative: if(passwordSafe[passwordName]); returns true if value exists; Object.keys not necessary
     if (passwordSafeKeys.includes(passwordName)) {
-      console.log(chalk.green(passwordSafe[passwordName]));
+      const decryptPassword = decryptData(
+        passwordSafe[passwordName],
+        secretMasterPassword
+      );
+      console.log(chalk.green(decryptPassword));
     } else {
       console.log(chalk.yellow("Does not exist in database!"));
     }
@@ -77,6 +82,8 @@ async function validateAccess() {
   }
 }
 
+// Question prompt for new entries
+
 const questionNewTitle = [
   {
     type: "input",
@@ -87,7 +94,7 @@ const questionNewTitle = [
 
 const questionNewPassword = [
   {
-    type: "input",
+    type: "password",
     name: "answerPassword",
     message: "Password?",
   },
@@ -96,7 +103,18 @@ const questionNewPassword = [
 async function createNewEntry() {
   const { answerTitle } = await inquirer.prompt(questionNewTitle);
   const { answerPassword } = await inquirer.prompt(questionNewPassword);
-  return { [answerTitle]: answerPassword };
+  const encryptPassword = encryptData(answerPassword, secretMasterPassword);
+  return { [answerTitle]: encryptPassword };
+}
+
+// crypto-js
+
+function encryptData(data, password) {
+  return CryptoJS.AES.encrypt(JSON.stringify(data), password).toString();
+}
+function decryptData(data, password) {
+  const bytes = CryptoJS.AES.decrypt(data, password);
+  return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
 }
 
 validateAccess();
