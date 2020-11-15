@@ -1,76 +1,20 @@
-const fs = require("fs").promises;
 const chalk = require("chalk");
 const kleur = require("kleur");
-const {
-  askForMasterPassword,
-  askGetOrSave,
-  askPasswordName,
-} = require("./lib/questions");
+const { askForMasterPassword, askForCRUD } = require("./lib/questions");
+const { connect, close } = require("./lib/database");
+const { readEntry } = require("./lib/readEntry");
 const { createNewEntry } = require("./lib/newEntry");
-const { decryptData } = require("./lib/crypto");
-const { readMasterPassword } = require("./lib/masterPassword");
-
-const MongoClient = require("mongodb").MongoClient;
-const assert = require("assert");
-
-// Connection URL
-const url =
-  "mongodb+srv://ncbecker:EuVztcw4v0TIyoQh@cluster0.lsu6t.mongodb.net/pw-manager?retryWrites=true&w=majority";
-
-// WRITE
-MongoClient.connect(url, function (err, client) {
-  assert.equal(null, err);
-  const db = client.db("pw-manager");
-
-  db.collection("passwords")
-    .insertOne({
-      name: "gmail",
-      value: "mailpassword",
-    })
-    .then(function (result) {
-      // process result
-    });
-  // client.close();
-});
-
-// READ
-MongoClient.connect(url, function (err, client) {
-  assert.equal(null, err);
-  const db = client.db("pw-manager");
-
-  const cursor = db.collection("passwords").find({});
-
-  function iterateFunc(doc) {
-    console.log(JSON.stringify(doc, null, 4));
-  }
-
-  function errorFunc(error) {
-    console.log(error);
-  }
-
-  cursor.forEach(iterateFunc, errorFunc);
-  // client.close();
-});
-
-// DELETE SINGLE DOCUMENT
-MongoClient.connect(url, function (err, client) {
-  assert.equal(null, err);
-  const db = client.db("pw-manager");
-
-  db.collection("passwords")
-    .deleteOne({
-      name: "gmail",
-    })
-    .then(function (result) {
-      // process result
-    });
-  // client.close();
-});
-
-console.log(kleur.bgYellow(chalk.magenta("PW-Manager")));
+require("dotenv").config();
 
 async function run() {
-  const secretMasterPassword = await readMasterPassword();
+  console.log(kleur.bgYellow(chalk.magenta("PW-Manager")));
+  console.log(chalk.magenta("Connecting to database..."));
+
+  await connect(process.env.DB_URL, process.env.DB_NAME);
+
+  console.log(chalk.magenta("Connected to database 🎉"));
+
+  const secretMasterPassword = process.env.MASTERPW;
 
   const answerMasterPassword = await askForMasterPassword();
 
@@ -79,37 +23,26 @@ async function run() {
     return run();
   }
 
-  const answerSaveOrGet = await askGetOrSave();
+  const answerCRUD = await askForCRUD();
 
-  const passwordSafeJSON = await fs.readFile("./db.json", "utf8");
-
-  const passwordSafe = JSON.parse(passwordSafeJSON);
-
-  if (answerSaveOrGet === "GET") {
-    const answerPasswordName = await askPasswordName();
-
-    const passwordSafeKeys = Object.keys(passwordSafe);
-
-    if (passwordSafeKeys.includes(answerPasswordName)) {
-      const decryptPassword = decryptData(
-        passwordSafe[answerPasswordName],
-        secretMasterPassword
-      );
-      console.log(chalk.green(decryptPassword));
-    } else {
-      console.log(chalk.yellow("Does not exist in database!"));
-    }
-  } else if (answerSaveOrGet === "SAVE") {
-    const newEntry = await createNewEntry(secretMasterPassword);
-    const newPasswordSafe = Object.assign(passwordSafe, newEntry);
-    const data = JSON.stringify(newPasswordSafe);
-
-    await fs.writeFile("./db.json", data);
-
-    console.log(chalk.green("SAVED 🚀"));
-  } else {
-    console.log("RESTART");
+  switch (answerCRUD) {
+    case "CREATE":
+      await createNewEntry(process.env.MASTERPW);
+      break;
+    case "READ":
+      await readEntry();
+      break;
+    case "UPDATE":
+      console.log("Update");
+      break;
+    case "DELETE":
+      console.log("Delete");
+      break;
   }
+
+  await close();
+
+  console.log(chalk.magenta("Connection to database closed!"));
 }
 
 run();
