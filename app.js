@@ -4,6 +4,7 @@ const { askForMasterPassword, askForCRUD } = require("./lib/questions");
 const { connect, close } = require("./lib/database");
 const { readEntry } = require("./lib/readEntry");
 const { createNewEntry } = require("./lib/newEntry");
+const { deleteExistingEntry } = require("./lib/deleteEntry");
 require("dotenv").config();
 
 async function run() {
@@ -36,7 +37,7 @@ async function run() {
       console.log("Update");
       break;
     case "DELETE":
-      console.log("Delete");
+      await deleteExistingEntry();
       break;
   }
 
