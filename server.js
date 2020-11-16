@@ -2,7 +2,12 @@ require("dotenv").config();
 const chalk = require("chalk");
 const kleur = require("kleur");
 const express = require("express");
-const { connect, getPassword, getAllPasswords } = require("./lib/database");
+const {
+  connect,
+  getPassword,
+  deletePassword,
+  getAllPasswords,
+} = require("./lib/database");
 
 const app = express();
 const port = 3600;
@@ -13,13 +18,19 @@ app.get("/api/passwords/:name", async (request, response) => {
   response.send(passwordValue);
 });
 
-app.get("/api/passwords/all", async (request, response) => {
+app.get("/api/passwords", async (request, response) => {
   const passwordNames = await getAllPasswords();
   response.send(passwordNames);
 });
 
 app.post("/api/passwords", (request, response) => {
   response.send("Under construction");
+});
+
+app.delete("/api/passwords/:name", async (request, response) => {
+  const { name } = request.params;
+  await deletePassword(name);
+  response.send(name + "deleted");
 });
 
 async function run() {
