@@ -49,10 +49,21 @@ app.post("/api/passwords", async (request, response) => {
   }
 });
 
-app.delete("/api/passwords/:name", async (request, response) => {
-  const { name } = request.params;
-  await deletePassword(name);
-  response.send(`${name} got deleted!`);
+app.delete("/api/passwords/:passwordName", async (request, response) => {
+  const { passwordName } = request.params;
+  try {
+    const result = await deletePassword(passwordName);
+    console.log(result);
+    if (result.deletedCount === 0) {
+      return response.status(404).send("Couldn't find password");
+    }
+    response.status(200).send(`${passwordName} got deleted!`);
+  } catch (error) {
+    console.error(error);
+    response
+      .status(500)
+      .send("An unexpected error occured. Please try again later!");
+  }
 });
 
 async function run() {
