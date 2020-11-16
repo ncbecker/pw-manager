@@ -53,7 +53,6 @@ app.delete("/api/passwords/:passwordName", async (request, response) => {
   const { passwordName } = request.params;
   try {
     const result = await deletePassword(passwordName);
-    console.log(result);
     if (result.deletedCount === 0) {
       return response.status(404).send("Couldn't find password");
     }
