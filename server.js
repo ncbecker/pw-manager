@@ -16,10 +16,16 @@ app.get("/api/passwords/:name", async (request, response) => {
   const { name } = request.params;
   try {
     const passwordValue = await getPassword(name);
+    if (!passwordValue) {
+      response
+        .status(404)
+        .send("Could not find the password you have specified");
+      return;
+    }
     response.send(passwordValue);
   } catch (error) {
     console.error(error);
-    response.status(404).send("Could not find the password you have specified");
+    response.status(500).send("An internal server error occured");
   }
 });
 
@@ -28,7 +34,7 @@ app.get("/api/passwords", async (request, response) => {
   response.send(passwordNames);
 });
 
-app.post("/api/passwords", (request, response) => {
+app.post("/api/passwords", async (request, response) => {
   response.send("Under construction");
 });
 
