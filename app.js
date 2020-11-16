@@ -9,42 +9,49 @@ const { deleteExistingEntry } = require("./lib/deleteEntry");
 const { updateExistingEntry } = require("./lib/updateEntry");
 
 async function run() {
-  console.log(kleur.bgYellow(chalk.magenta("PW-Manager")));
-  console.log(chalk.magenta("Connecting to database..."));
+  try {
+    console.log(kleur.bgYellow(chalk.magenta("PW-Manager")));
+    console.log(chalk.magenta("Connecting to database..."));
 
-  await connect(process.env.DB_URL, process.env.DB_NAME);
+    await connect(process.env.DB_URL, process.env.DB_NAME);
 
-  console.log(chalk.magenta("Connected to database 🎉"));
+    console.log(chalk.magenta("Connected to database 🎉"));
 
-  const secretMasterPassword = process.env.MASTERPW;
+    const secretMasterPassword = process.env.MASTERPW;
 
-  const answerMasterPassword = await askForMasterPassword();
+    const answerMasterPassword = await askForMasterPassword();
 
-  if (answerMasterPassword !== secretMasterPassword) {
-    console.error(chalk.red("You are not welcome here! 👿"));
-    return run();
+    if (answerMasterPassword !== secretMasterPassword) {
+      console.error(chalk.red("You are not welcome here! 👿"));
+      return run();
+    }
+
+    const answerCRUD = await askForCRUD();
+
+    switch (answerCRUD) {
+      case "CREATE":
+        await createNewEntry(process.env.MASTERPW);
+        break;
+      case "READ":
+        await readEntry();
+        break;
+      case "UPDATE":
+        await updateExistingEntry();
+        break;
+      case "DELETE":
+        await deleteExistingEntry();
+        break;
+    }
+  } catch (error) {
+    if (error.message.match("E11000")) {
+      console.error("DUPLICATE KEY JO!");
+    } else {
+      console.error(error);
+    }
+  } finally {
+    await close();
+    console.log(chalk.magenta("Connection to database closed!"));
   }
-
-  const answerCRUD = await askForCRUD();
-
-  switch (answerCRUD) {
-    case "CREATE":
-      await createNewEntry(process.env.MASTERPW);
-      break;
-    case "READ":
-      await readEntry();
-      break;
-    case "UPDATE":
-      await updateExistingEntry();
-      break;
-    case "DELETE":
-      await deleteExistingEntry();
-      break;
-  }
-
-  await close();
-
-  console.log(chalk.magenta("Connection to database closed!"));
 }
 
 run();
