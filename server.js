@@ -7,9 +7,11 @@ const {
   getPassword,
   deletePassword,
   getAllPasswords,
+  setPassword,
 } = require("./lib/database");
 
 const app = express();
+app.use(express.json());
 const port = 3600;
 
 app.get("/api/passwords/:name", async (request, response) => {
@@ -35,13 +37,22 @@ app.get("/api/passwords", async (request, response) => {
 });
 
 app.post("/api/passwords", async (request, response) => {
-  response.send("Under construction");
+  const password = request.body;
+  try {
+    await setPassword(password.name, password.value);
+    response.send(`Successfully set password for ${password.name}`);
+  } catch (error) {
+    console.error(error);
+    response
+      .status(500)
+      .send("An unexpected error occured. Please try again later!");
+  }
 });
 
 app.delete("/api/passwords/:name", async (request, response) => {
   const { name } = request.params;
   await deletePassword(name);
-  response.send(name + "deleted");
+  response.send(`${name} got deleted!`);
 });
 
 async function run() {
