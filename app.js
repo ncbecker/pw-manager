@@ -1,3 +1,4 @@
+require("dotenv").config();
 const chalk = require("chalk");
 const kleur = require("kleur");
 const { askForMasterPassword, askForCRUD } = require("./lib/questions");
@@ -6,7 +7,6 @@ const { readEntry } = require("./lib/readEntry");
 const { createNewEntry } = require("./lib/newEntry");
 const { deleteExistingEntry } = require("./lib/deleteEntry");
 const { updateExistingEntry } = require("./lib/updateEntry");
-require("dotenv").config();
 
 async function run() {
   console.log(kleur.bgYellow(chalk.magenta("PW-Manager")));
