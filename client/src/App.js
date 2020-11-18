@@ -5,16 +5,15 @@ import { useEffect, useState } from "react";
 import useAsync from "./hooks/useAsync";
 
 function App() {
-  const [password, setPassword] = useState(null);
   const [passwordName, setPasswordName] = useState("");
 
   const { data, loading, error, doFetch } = useAsync(() =>
     getPassword(passwordName)
   );
 
-  useEffect(() => {
-    doFetch();
-  }, []);
+  // useEffect(() => {
+  //   doFetch();
+  // }, []);
 
   function handleChange(event) {
     setPasswordName(event.target.value);
@@ -23,8 +22,6 @@ function App() {
   async function handleSubmit(event) {
     event.preventDefault();
     doFetch();
-    // const passwordValue = await getPassword(passwordName);
-    // setPassword(passwordValue);
     setPasswordName("");
   }
 
