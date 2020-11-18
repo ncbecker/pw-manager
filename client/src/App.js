@@ -1,7 +1,7 @@
 import logo from "./logo.svg";
 import "./App.css";
 import { getPassword } from "./api/passwords";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useAsync from "./hooks/useAsync";
 
 function App() {
@@ -10,10 +10,6 @@ function App() {
   const { data, loading, error, doFetch } = useAsync(() =>
     getPassword(passwordName)
   );
-
-  // useEffect(() => {
-  //   doFetch();
-  // }, []);
 
   function handleChange(event) {
     setPasswordName(event.target.value);
