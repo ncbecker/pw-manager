@@ -1,7 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import { getPassword } from "./api/passwords";
+import { useEffect, useState } from "react";
 
 function App() {
+  const [password, setPassword] = useState(null);
+
+  useEffect(() => {
+    async function pwFetch() {
+      const passwordValue = await getPassword("pw4ufork");
+      setPassword(passwordValue);
+    }
+    pwFetch();
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -17,6 +29,7 @@ function App() {
         >
           Learn React
         </a>
+        {password}
       </header>
     </div>
   );
