@@ -5,11 +5,14 @@ import { useEffect, useState } from "react";
 
 function App() {
   const [password, setPassword] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function pwFetch() {
+      setLoading(true);
       const passwordValue = await getPassword("pw4ufork");
       setPassword(passwordValue);
+      setLoading(false);
     }
     pwFetch();
   }, []);
@@ -29,6 +32,7 @@ function App() {
         >
           Learn React
         </a>
+        {loading && <div>Loading...</div>}
         {password}
       </header>
     </div>
