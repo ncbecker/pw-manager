@@ -6,33 +6,30 @@ import { useEffect, useState } from "react";
 function App() {
   const [password, setPassword] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function pwFetch() {
-      setLoading(true);
-      const passwordValue = await getPassword("pw4ufork");
-      setPassword(passwordValue);
+    try {
+      async function pwFetch() {
+        setLoading(true);
+        const passwordValue = await getPassword("pw4ufork");
+        setPassword(passwordValue);
+      }
+      pwFetch();
+    } catch (error) {
+      console.error(error);
+      setError(error);
+    } finally {
       setLoading(false);
     }
-    pwFetch();
   }, []);
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
         {loading && <div>Loading...</div>}
+        {error && <div>{error.message}</div>}
         {password}
       </header>
     </div>
