@@ -2,6 +2,7 @@ require("dotenv").config();
 const chalk = require("chalk");
 const kleur = require("kleur");
 const express = require("express");
+const path = require("path");
 const {
   connect,
   getPassword,
@@ -12,7 +13,7 @@ const {
 
 const app = express();
 app.use(express.json());
-const port = 3600;
+const port = process.env.PORT || 3600;
 
 app.get("/api/passwords/:name", async (request, response) => {
   const { name } = request.params;
@@ -63,6 +64,17 @@ app.delete("/api/passwords/:passwordName", async (request, response) => {
       .status(500)
       .send("An unexpected error occured. Please try again later!");
   }
+});
+
+app.use(express.static(path.join(__dirname, "client/build")));
+
+app.use(
+  "/storybook",
+  express.static(path.join(__dirname, "client/storybook-static"))
+);
+
+app.get("*", (request, response) => {
+  response.sendFile(path.join(__dirname, "client/build", "index.html"));
 });
 
 async function run() {
