@@ -2,3 +2,5 @@
 node_modules
 .masterPassword
 .env
+client/build
+client/src/storybook-static
